@@ -66,7 +66,7 @@ import parser
 
 # Info tags for infotags.py:
 __author__ = 'Aaron Hosford'
-__author_email__ = 'hosford42@gmail.com'
+__author_email__ = 'Aaron.Hosford@Ericsson.com'
 __version__ = '1.0'
 __description__ = 'Meta info extraction for Python package setup scripts'
 __long_description__ = __doc__
