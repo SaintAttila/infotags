@@ -62,12 +62,13 @@ Copyright information for infotags:
 import ast
 import os
 import parser
+import warnings
 
 
 # Info tags for infotags.py:
 __author__ = 'Aaron Hosford'
 __author_email__ = 'Aaron.Hosford@Ericsson.com'
-__version__ = '1.0'
+__version__ = '1.1'
 __description__ = 'Meta info extraction for Python package setup scripts'
 __long_description__ = __doc__
 __license__ = 'MIT (https://opensource.org/licenses/MIT)'
@@ -129,16 +130,19 @@ def is_valid_suite(source):
         return True
 
 
-def extract_info(source_path):
+def extract_info(source_path, package_name=None):
     """
     Parse a Python source file, extracting the docstring and info tags. Put the results into a
     dictionary keyed by the info tag name (minus the double underscores). The docstring will be
     stored under key 'doc'.
 
     :param source_path: The path to the Python source file.
+    :param package_name: The name of the package.
     :return: The info map.
     """
     results = {}
+    if package_name is not None:
+        results['name'] = package_name
     with open(source_path) as source_file:
         entry = None
         doc = False
@@ -178,16 +182,45 @@ def extract_info(source_path):
                         value = ast.literal_eval(value)
                     except ValueError:
                         # Here we allow one special exception to the requirement that entry values
-                        # must always be Python literals. They may also be set to the values of
-                        # other previous entries. This allows us to use the following common idiom:
+                        # must always be Python literals. They may also reference other entries.
+                        #  This allows us to use the following common idioms:
                         #   __long_description__ = __doc__
+                        #   __package_data__ = {__name__: ['*.ini']}
                         if (value.startswith('__') and value.endswith('__') and
                                 value[2:-2] in results):
                             results[name] = results[value[2:-2]]
                         else:
-                            pass  # It's not a valid entry.
+                            try:
+                                if any(('__' + key + '__') in value for key in results):
+                                    for key in sorted(results, key=len, reverse=True):
+                                        if isinstance(results[key], str):
+                                            # ast.literal_eval can't handle addition of strings, but
+                                            # when we do the replace, we can get rid of the plus and
+                                            # use the automatic string-joining syntax. Because we
+                                            # are still running it through ast.literal_eval(), it's
+                                            # a safe operation.
+                                            pieces = value.split('__' + key + '__')
+                                            for index, piece in enumerate(pieces):
+                                                if piece.lstrip().startswith('+'):
+                                                    piece = piece.lstrip()[1:]
+                                                if piece.rstrip().endswith('+'):
+                                                    piece = piece.rstrip()[:-1]
+                                                pieces[index] = piece
+                                            value = repr(results[key]).join(pieces)
+                                        else:
+                                            value = \
+                                                value.replace('__' + key + '__', repr(results[key]))
+                                value = ast.literal_eval(value)
+                            except ValueError:
+                                # It's not a valid entry.
+                                warnings.warn("Ill-formed tag value for tag %s:\n%s" %
+                                              (name,
+                                               repr(value)[:100] +
+                                               ('...' if len(repr(value)) > 100 else '')))
+                            else:
+                                results[name] = value
                     except SyntaxError:
-                        pass
+                        pass  # It's not a valid entry.
                     else:
                         results[name] = value
                     entry = None
@@ -259,5 +292,5 @@ def get_info(package_name, parent_folder=None):
     """
     results = {'name': package_name}
     for source_path in reversed(locate_source_files(package_name, parent_folder)):
-        results.update(extract_info(source_path))
+        results.update(extract_info(source_path, package_name))
     return results
