@@ -72,7 +72,7 @@ import warnings
 # Info tags for infotags.py (how meta!)
 __author__ = 'Aaron Hosford'
 __author_email__ = 'hosford42@gmail.com'
-__version__ = '1.1'
+__version__ = '1.1.1'
 __description__ = 'Meta info extraction for Python package setup scripts'
 __long_description__ = __doc__
 __license__ = 'MIT (https://opensource.org/licenses/MIT)'
@@ -104,6 +104,18 @@ __classifiers__ = [
     'Topic :: Utilities',
 ]
 __keywords__ = 'setuptools distutils setup meta metadata'
+
+
+try:
+    isidentifier = str.isidentifier
+except AttributeError:
+    def isidentifier(string):
+        """Determine whether a string is a valid Python identifier."""
+        return (
+            bool(string) and
+            (string[0].isalpha() or string[0] == '_') and
+            all(c.isalnum() or c == '_' for c in string)
+        )
 
 
 def _split_entry(entry, doc):
@@ -199,7 +211,7 @@ def extract_info(source_path, package_name=None):
                         # is the intended one.
                         if (identifier.startswith('__') and
                                 identifier.endswith('__') and
-                                identifier.isidentifier() and
+                                isidentifier(identifier) and
                                 identifier.lower() == identifier and
                                 identifier[2:-2] not in results):
                             entry = line
@@ -298,7 +310,7 @@ def locate_source_files(package_name, parent_folder=None):
         will appear in that order.
     """
     assert package_name and isinstance(package_name, str)
-    assert package_name.isidentifier()
+    assert isidentifier(package_name)
 
     # Find the correct parent folder.
     if not parent_folder:
