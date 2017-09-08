@@ -4,6 +4,9 @@
 infotags
 ========
 
+* Project Home: https://github.com/SaintAttila/infotags
+* Python Package Index: https://pypi.python.org/pypi/infotags
+
 Infotags extracts package or module meta information for use by setup.py and
 packaging utilities. It scans your package or module's source code for tags of
 the form `__tag_name__ = literal_value`, removing the double underscores and
