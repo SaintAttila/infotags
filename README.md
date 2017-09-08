@@ -1,7 +1,3 @@
-# coding=utf-8
-
-
-"""
 infotags
 ========
 
@@ -62,19 +58,3 @@ information for infotags:
     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
     FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
     IN THE SOFTWARE.
-"""
-
-
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
-
-# This will always succeed because infotags has no external dependencies. That
-# means you can include it in your distribution next to your setup.py script
-# and just assume it will work, like I do here.
-import infotags
-
-
-PACKAGE_NAME = 'infotags'
-setup(**infotags.get_info(PACKAGE_NAME))
