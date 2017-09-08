@@ -75,7 +75,7 @@ import warnings
 # Info tags for infotags.py (how meta!)
 __author__ = 'Aaron Hosford'
 __author_email__ = 'hosford42@gmail.com'
-__version__ = '1.1.1'
+__version__ = '1.1.2'
 __description__ = 'Meta info extraction for Python package setup scripts'
 __long_description__ = __doc__
 __license__ = 'MIT (https://opensource.org/licenses/MIT)'
